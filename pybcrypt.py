@@ -9,6 +9,7 @@ pygtk.require('2.0')
 import gtk
 import pango
 import subprocess
+from subprocess import Popen, PIPE
 
 class PyBcrypt:
 
@@ -44,44 +45,36 @@ class PyBcrypt:
         """When ofile entry change"""
         self.change_pswd_sen()
 
+    def pswd_prompt(self, prompt = "Input password:"):
+        """Prompt password info"""
+        attr = pango.AttrList()
+        attr.insert(pango.AttrForeground(65535, 0, 0, 0, -1))
+        self.label.set_text(prompt)
+        self.label.set_attributes(attr)
+
     def bcrypt(self, widget, data=None):
-        """docstring for bcrypt"""
+        """Encrypt or decrypt a file"""
         #print "bcrypt something"
         password = self.pswd1.get_text()
         if len(password) < 8:
-            attr = pango.AttrList()
-            attr.insert(pango.AttrForeground(65535, 0, 0, 0, -1))
-            self.label.set_text("Pswd at least 8 char!")
-            self.label.set_attributes(attr)
-            return
-        openfile = self.ofile.get_text()
-        if openfile[-4:len(openfile)] == ".bfe":
-            tempf = file('/tmp/temppybcrypt', 'w')
-            tempf.write(password + "\n")
-            tempf.close()
-            tempf = file('/tmp/temppybcrypt', 'r')
-            subprocess.call(["bcrypt", openfile], stdin = tempf)
-            tempf.close()
-            subprocess.call(["rm", "-f", "/tmp/temppybcrypt"])
+            self.pswd_prompt("Pswd at least 8 chars!")
+            return False
+
+        filename = self.ofile.get_text()
+        if filename[-4:len(filename)] == ".bfe":
+            po = Popen(('bcrypt', filename), stdin = PIPE, stdout = PIPE)
+            result = po.communicate(password + "\n")
+            print result[0]
+
             gtk.main_quit()
         else:
             pswd2 = self.pswd2.get_text()
             if password != pswd2:
-                attr = pango.AttrList()
-                attr.insert(pango.AttrForeground(65535, 0, 0, 0, -1))
-                self.label.set_text("Password not equal!")
-                self.label.set_attributes(attr)
+                self.pswd_prompt("Password not equal!")
             else:
-                # TODO 去掉临时密码文件
-                tempf = file('/tmp/temppybcrypt', 'w')
-                tempf.write(password + "\n")
-                tempf.write(password + "\n")
-                tempf.close()
-                tempf = file('/tmp/temppybcrypt')
-                #subprocess.call(["echo", "-e", echopassword, "|", "bcrypt", "/home/keepzero/testfile"])
-                subprocess.call(["bcrypt", openfile], stdin = tempf)
-                tempf.close()
-                subprocess.call(["rm", "-f", "/tmp/temppybcrypt"])
+                po = Popen(('bcrypt', filename), stdin = PIPE, stdout = PIPE)
+                result = po.communicate(password + "\n" + password + "\n")
+                print result[0]
                 gtk.main_quit()
 
     def __init__(self):
