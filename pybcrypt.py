@@ -60,9 +60,11 @@ class PyBcrypt:
             self.pswd_prompt("Pswd at least 8 chars!")
             return False
 
+        ec = sys.getfilesystemencoding()
+        #print str.decode('UTF-8').encode(type)
         filename = self.ofile.get_text()
         if filename[-4:len(filename)] == ".bfe":
-            po = Popen(('bcrypt', filename), stdin = PIPE, stdout = PIPE)
+            po = Popen(('bcrypt', filename.decode('UTF-8').encode(ec)), stdin = PIPE, stdout = PIPE)
             result = po.communicate(password + "\n")
             print result[0]
 
@@ -72,13 +74,13 @@ class PyBcrypt:
             if password != pswd2:
                 self.pswd_prompt("Password not equal!")
             else:
-                po = Popen(('bcrypt', filename), stdin = PIPE, stdout = PIPE)
+                po = Popen(('bcrypt', filename.decode('UTF-8').encode(ec)), stdin = PIPE, stdout = PIPE)
                 result = po.communicate(password + "\n" + password + "\n")
                 print result[0]
                 gtk.main_quit()
 
     def __init__(self):
-        """docstring for __init__"""
+        """Graphics init"""
         self.window = gtk.Window(gtk.WINDOW_TOPLEVEL)
         self.window.set_title("PyBcrypt")
         self.window.set_size_request(280, 180)
