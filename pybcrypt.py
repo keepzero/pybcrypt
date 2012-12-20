@@ -13,39 +13,36 @@ import subprocess
 class PyBcrypt:
 
     def delete_event(self, widget, event, data=None):
-        """docstring for delete_event"""
-        print "delete event occurred"
         return False
 
     def destroy(self, widget, data=None):
-        """docstring for destroy"""
+        """Quit PyGTK"""
         gtk.main_quit()
 
     def choice(self, widget, data=None):
-        """docstring for choice"""
-        self.fcdiabtn1 = gtk.Button("Choice")
-        self.fcdiabtn2 = gtk.Button("Cancel")
-        self.fcdia = gtk.FileChooserDialog("Choice File", action = gtk.FILE_CHOOSER_ACTION_OPEN, buttons = (gtk.STOCK_CANCEL, gtk.RESPONSE_CANCEL, gtk.STOCK_OPEN, gtk.RESPONSE_OK))
-        #self.fcdia.show()
-        res = self.fcdia.run()
-        if res == gtk.RESPONSE_CANCEL:
+        """Choice file with FileChooserDialog"""
+        self.fcdia = gtk.FileChooserDialog("Choice File", \
+                action = gtk.FILE_CHOOSER_ACTION_OPEN, \
+                buttons = (gtk.STOCK_CANCEL, gtk.RESPONSE_CANCEL, gtk.STOCK_OPEN, gtk.RESPONSE_OK))
+        response = self.fcdia.run()
+        if response == gtk.RESPONSE_CANCEL:
             self.fcdia.destroy()
-        if res == gtk.RESPONSE_OK:
+        if response == gtk.RESPONSE_OK:
             self.ofile.set_text(self.fcdia.get_filename())
             self.fcdia.destroy()
-            filename = self.ofile.get_text()
-            if filename[-4:len(filename)] == ".bfe":
-                self.pswd2.set_sensitive(False)
-            else:
-                self.pswd2.set_sensitive(True)
+            self.change_pswd_sen()
 
-    def on_ofile_change(self, widget, event=None):
-        """docstring for on_change"""
+    def change_pswd_sen(self):
+        """Set the pswd2 sensitive"""
         filename = self.ofile.get_text()
         if filename[-4:len(filename)] == ".bfe":
             self.pswd2.set_sensitive(False)
         else:
             self.pswd2.set_sensitive(True)
+
+    def on_ofile_change(self, widget, event=None):
+        """When ofile entry change"""
+        self.change_pswd_sen()
 
     def bcrypt(self, widget, data=None):
         """docstring for bcrypt"""
